@@ -7,6 +7,10 @@ Rails.application.routes.draw do
     namespace :v1 do
       post "signup", to: "registrations#create"
       post "login", to: "sessions#create"
+
+      resources :teams, only: %i[index create show update destroy] do
+        resources :memberships, only: %i[index create update destroy], controller: "team_memberships"
+      end
     end
   end
 end
