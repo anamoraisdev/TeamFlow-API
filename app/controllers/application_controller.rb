@@ -1,9 +1,12 @@
 class ApplicationController < ActionController::API
+  include Pundit::Authorization
+
   before_action :authenticate_request
 
   rescue_from ActiveRecord::RecordNotFound, with: :render_not_found
   rescue_from ActiveRecord::RecordInvalid, with: :render_validation_error
   rescue_from ActionController::ParameterMissing, with: :render_bad_request
+  rescue_from Pundit::NotAuthorizedError, with: :render_forbidden
 
   private
 
@@ -45,5 +48,9 @@ class ApplicationController < ActionController::API
 
   def render_bad_request(exception)
     render_error(status: :bad_request, code: "bad_request", message: exception.message)
+  end
+
+  def render_forbidden
+    render_error(status: :forbidden, code: "forbidden", message: "You are not authorized to perform this action")
   end
 end
