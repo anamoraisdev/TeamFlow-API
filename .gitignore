@@ -1,0 +1,26 @@
+/.bundle
+/log/*
+/tmp/*
+!/log/.keep
+!/tmp/.keep
+/tmp/pids/*
+!/tmp/pids/.keep
+
+/db/*.sqlite3
+/db/*.sqlite3-journal
+
+/public/system
+/public/assets
+
+/.byebug_history
+/.ruby-lsp
+
+# Ignore master key for decrypting credentials and more.
+/config/master.key
+
+# Local environment variables (secrets, DB credentials for local dev)
+.env
+.env.*
+!.env.example
+
+.DS_Store
