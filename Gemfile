@@ -47,4 +47,19 @@ group :development, :test do
 
   # Omakase Ruby styling [https://github.com/rails/rubocop-rails-omakase/]
   gem "rubocop-rails-omakase", require: false
+
+  # Testing framework
+  gem "rspec-rails"
+
+  # Concise matchers for common model validations/associations
+  gem "shoulda-matchers"
+
+  # Matchers for testing Pundit policies (permit_action/forbid_action)
+  gem "pundit-matchers"
+
+  # Test data factories
+  gem "factory_bot_rails"
+
+  # Fake data generator for factories/seeds
+  gem "faker"
 end
