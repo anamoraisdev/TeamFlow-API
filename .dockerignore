@@ -1,0 +1,10 @@
+.git
+.gitignore
+log/*
+tmp/*
+!log/.keep
+!tmp/.keep
+.env
+.env.*
+!.env.example
+.ruby-lsp
