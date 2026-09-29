@@ -11,6 +11,8 @@ module Api
       end
 
       def create
+        return if reject_owner_role!
+
         membership = @team.team_memberships.new(membership_params)
         authorize membership, policy_class: MembershipPolicy
         membership.save!
@@ -18,6 +20,8 @@ module Api
       end
 
       def update
+        return if reject_owner_role!
+
         authorize @membership, policy_class: MembershipPolicy
         @membership.update!(role: membership_params[:role])
         render json: TeamMembershipBlueprint.render_as_hash(@membership)
@@ -41,6 +45,20 @@ module Api
 
       def membership_params
         params.require(:membership).permit(:user_id, :role)
+      end
+
+      # Ownership is assigned exactly once, automatically, when a team is created
+      # (see TeamsController#create) and is not transferable through this endpoint.
+      def reject_owner_role!
+        return false unless membership_params[:role].to_s == "owner"
+
+        render_error(
+          status: :unprocessable_content,
+          code: "validation_failed",
+          message: "Validation failed",
+          details: { role: [ "cannot be set to owner through this endpoint" ] }
+        )
+        true
       end
     end
   end
