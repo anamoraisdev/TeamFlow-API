@@ -1,5 +1,6 @@
 class ApplicationController < ActionController::API
   include Pundit::Authorization
+  include Pagy::Backend
 
   before_action :authenticate_request
 
@@ -21,6 +22,10 @@ class ApplicationController < ActionController::API
 
   def current_user
     @current_user
+  end
+
+  def pagination_meta(pagy)
+    { page: pagy.page, items: pagy.limit, count: pagy.count, pages: pagy.pages }
   end
 
   def render_error(status:, code:, message:, details: nil)
