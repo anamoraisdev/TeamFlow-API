@@ -16,6 +16,7 @@ module Api
         task = @project.tasks.new(task_params)
         authorize task
         task.save!
+        AuditLogger.record(team: @project.team, user: current_user, action: "task.created", auditable: task)
         render json: TaskBlueprint.render_as_hash(task), status: :created
       end
 
@@ -25,10 +26,12 @@ module Api
 
       def update
         @task.update!(task_params)
+        AuditLogger.record(team: @task.project.team, user: current_user, action: "task.updated", auditable: @task)
         render json: TaskBlueprint.render_as_hash(@task)
       end
 
       def destroy
+        AuditLogger.record(team: @task.project.team, user: current_user, action: "task.deleted", auditable: @task)
         @task.destroy!
         head :no_content
       end

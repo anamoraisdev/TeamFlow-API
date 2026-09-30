@@ -14,6 +14,7 @@ module Api
         project = @team.projects.new(project_params)
         authorize project
         project.save!
+        AuditLogger.record(team: @team, user: current_user, action: "project.created", auditable: project)
         render json: ProjectBlueprint.render_as_hash(project), status: :created
       end
 
@@ -23,10 +24,12 @@ module Api
 
       def update
         @project.update!(project_params)
+        AuditLogger.record(team: @project.team, user: current_user, action: "project.updated", auditable: @project)
         render json: ProjectBlueprint.render_as_hash(@project)
       end
 
       def destroy
+        AuditLogger.record(team: @project.team, user: current_user, action: "project.deleted", auditable: @project)
         @project.destroy!
         head :no_content
       end

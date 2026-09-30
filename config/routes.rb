@@ -11,6 +11,7 @@ Rails.application.routes.draw do
       resources :teams, only: %i[index create show update destroy] do
         resources :memberships, only: %i[index create update destroy], controller: "team_memberships"
         resources :projects, only: %i[index create]
+        resources :audit_logs, only: %i[index]
       end
 
       resources :projects, only: %i[show update destroy] do

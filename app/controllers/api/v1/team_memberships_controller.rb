@@ -16,6 +16,10 @@ module Api
         membership = @team.team_memberships.new(membership_params)
         authorize membership, policy_class: MembershipPolicy
         membership.save!
+        AuditLogger.record(
+          team: @team, user: current_user, action: "membership.created", auditable: membership,
+          metadata: { member_user_id: membership.user_id, role: membership.role }
+        )
         render json: TeamMembershipBlueprint.render_as_hash(membership), status: :created
       end
 
@@ -23,12 +27,21 @@ module Api
         return if reject_owner_role!
 
         authorize @membership, policy_class: MembershipPolicy
+        previous_role = @membership.role
         @membership.update!(role: membership_params[:role])
+        AuditLogger.record(
+          team: @team, user: current_user, action: "membership.role_changed", auditable: @membership,
+          metadata: { member_user_id: @membership.user_id, from: previous_role, to: @membership.role }
+        )
         render json: TeamMembershipBlueprint.render_as_hash(@membership)
       end
 
       def destroy
         authorize @membership, policy_class: MembershipPolicy
+        AuditLogger.record(
+          team: @team, user: current_user, action: "membership.removed", auditable: @membership,
+          metadata: { member_user_id: @membership.user_id, role: @membership.role }
+        )
         @membership.destroy!
         head :no_content
       end

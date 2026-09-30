@@ -26,10 +26,12 @@ module Api
 
       def update
         @team.update!(team_params)
+        AuditLogger.record(team: @team, user: current_user, action: "team.updated", auditable: @team)
         render json: TeamBlueprint.render_as_hash(@team)
       end
 
       def destroy
+        AuditLogger.record(team: @team, user: current_user, action: "team.deleted", auditable: @team)
         @team.destroy!
         head :no_content
       end
