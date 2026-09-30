@@ -11,6 +11,7 @@ Rails.application.routes.draw do
       resources :teams, only: %i[index create show update destroy] do
         resources :memberships, only: %i[index create update destroy], controller: "team_memberships"
         resources :projects, only: %i[index create]
+        resources :invitations, only: %i[index create destroy]
         resources :audit_logs, only: %i[index]
       end
 
@@ -19,6 +20,10 @@ Rails.application.routes.draw do
       end
 
       resources :tasks, only: %i[show update destroy]
+
+      get "invitations", to: "invitations#mine"
+      post "invitations/:id/accept", to: "invitations#accept"
+      post "invitations/:id/decline", to: "invitations#decline"
 
       resources :notifications, only: %i[index]
       post "notifications/read_all", to: "notifications#read_all"

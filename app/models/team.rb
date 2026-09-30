@@ -3,6 +3,7 @@ class Team < ApplicationRecord
   has_many :users, through: :team_memberships
   has_many :projects, dependent: :destroy
   has_many :audit_logs, dependent: :destroy
+  has_many :invitations, dependent: :destroy
 
   validates :name, presence: true
 

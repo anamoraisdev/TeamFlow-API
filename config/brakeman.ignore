@@ -4,8 +4,13 @@
       "fingerprint": "b25c8e211407ef61107118aa4f0de2816da6fd9993dcde2d0374713cb77d738f",
       "note": "Role is permitted for mass assignment, but TeamMembershipsController#reject_owner_role! explicitly rejects any request that sets role to \"owner\" before create/update run (app/controllers/api/v1/team_memberships_controller.rb). Ownership is only ever assigned once, automatically, when a team is created. Static analysis can't see that runtime guard.",
       "file": "app/controllers/api/v1/team_memberships_controller.rb"
+    },
+    {
+      "fingerprint": "a62448095e4c2b974bc6264ad7c1a315cd9aae7e45f05fa990df7db4e7716c34",
+      "note": "Role is permitted for mass assignment, but InvitationsController#invalid_role! explicitly rejects any request whose role isn't a defined Invitation enum value (member/admin) before create runs (app/controllers/api/v1/invitations_controller.rb). \"owner\" isn't a valid Invitation role at all, so it can never reach the enum assignment. Static analysis can't see that runtime guard.",
+      "file": "app/controllers/api/v1/invitations_controller.rb"
     }
   ],
-  "updated": "2026-09-28 13:40:00 -0300",
+  "updated": "2026-09-29 21:35:00 -0300",
   "brakeman_version": "8.0.6"
 }

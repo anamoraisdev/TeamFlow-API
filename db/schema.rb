@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[8.1].define(version: 2026_09_29_100200) do
+ActiveRecord::Schema[8.1].define(version: 2026_09_29_100300) do
   # These are extensions that must be enabled in order to support this database
   enable_extension "pg_catalog.plpgsql"
 
@@ -27,6 +27,25 @@ ActiveRecord::Schema[8.1].define(version: 2026_09_29_100200) do
     t.index ["created_at"], name: "index_audit_logs_on_created_at"
     t.index ["team_id"], name: "index_audit_logs_on_team_id"
     t.index ["user_id"], name: "index_audit_logs_on_user_id"
+  end
+
+  create_table "invitations", force: :cascade do |t|
+    t.bigint "team_id", null: false
+    t.string "invited_email", null: false
+    t.bigint "invited_by_id", null: false
+    t.integer "role", default: 0, null: false
+    t.integer "status", default: 0, null: false
+    t.string "token", null: false
+    t.datetime "expires_at", null: false
+    t.integer "lock_version", default: 0, null: false
+    t.datetime "created_at", null: false
+    t.datetime "updated_at", null: false
+    t.index ["invited_by_id"], name: "index_invitations_on_invited_by_id"
+    t.index ["invited_email"], name: "index_invitations_on_invited_email"
+    t.index ["status"], name: "index_invitations_on_status"
+    t.index ["team_id", "invited_email"], name: "index_invitations_on_team_id_and_email_when_pending", unique: true, where: "(status = 0)"
+    t.index ["team_id"], name: "index_invitations_on_team_id"
+    t.index ["token"], name: "index_invitations_on_token", unique: true
   end
 
   create_table "notifications", force: :cascade do |t|
@@ -244,6 +263,8 @@ ActiveRecord::Schema[8.1].define(version: 2026_09_29_100200) do
 
   add_foreign_key "audit_logs", "teams"
   add_foreign_key "audit_logs", "users"
+  add_foreign_key "invitations", "teams"
+  add_foreign_key "invitations", "users", column: "invited_by_id"
   add_foreign_key "notifications", "users"
   add_foreign_key "projects", "teams"
   add_foreign_key "solid_queue_batch_executions", "solid_queue_batches", column: "batch_id", on_delete: :cascade
