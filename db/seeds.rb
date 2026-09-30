@@ -1,8 +1,9 @@
 # Seed data for local development.
 #
 # Creates two teams with a mix of owner/admin/member roles, a project in
-# each, and tasks spread across statuses/priorities/assignees so filtering
-# and pagination have something realistic to work against.
+# each, tasks spread across statuses/priorities/assignees, and a few
+# invitations/notifications/audit log entries so the newer endpoints have
+# something realistic to work against too.
 #
 # Usage: bin/rails db:seed (safe to run more than once)
 
@@ -12,7 +13,8 @@ users = [
   { name: "Ana Moraes", email: "ana@teamflow.dev" },
   { name: "Bruno Silva", email: "bruno@teamflow.dev" },
   { name: "Carla Souza", email: "carla@teamflow.dev" },
-  { name: "Diego Santos", email: "diego@teamflow.dev" }
+  { name: "Diego Santos", email: "diego@teamflow.dev" },
+  { name: "Elena Costa", email: "elena@teamflow.dev" }
 ].map do |attrs|
   User.find_or_create_by!(email: attrs[:email]) do |user|
     user.name = attrs[:name]
@@ -20,7 +22,7 @@ users = [
   end
 end
 
-ana, bruno, carla, diego = users
+ana, bruno, carla, diego, elena = users
 
 engineering = Team.find_or_create_by!(name: "Engineering")
 TeamMembership.find_or_create_by!(team: engineering, user: ana) { |m| m.role = :owner }
@@ -56,6 +58,39 @@ tasks.each do |attrs|
     task.assignee = attrs[:assignee]
     task.due_date = attrs[:due_date]
   end
+end
+
+pending_invitation = Invitation.find_or_create_by!(team: engineering, invited_email: elena.email) do |invitation|
+  invitation.invited_by = bruno
+  invitation.role = :member
+end
+
+declined_invitation = Invitation.find_or_create_by!(team: marketing, invited_email: carla.email) do |invitation|
+  invitation.invited_by = diego
+  invitation.role = :member
+end
+declined_invitation.decline! if declined_invitation.pending?
+
+Notification.find_or_create_by!(user: elena, category: "invitation_received") do |notification|
+  notification.title = "You've been invited to join #{engineering.name}"
+  notification.body = "#{bruno.name} invited you to join #{engineering.name} as member."
+  notification.payload = { invitation_id: pending_invitation.id, team_id: engineering.id }
+end
+
+Notification.find_or_create_by!(user: carla, category: "task_assigned") do |notification|
+  notification.title = "You were assigned to \"Write request specs\""
+  notification.body = "In project #{api_revamp.name}."
+  notification.read_at = 1.day.ago
+  notification.payload = { project_id: api_revamp.id }
+end
+
+[
+  { team: engineering, user: ana, action: "team.updated", auditable: engineering },
+  { team: engineering, user: bruno, action: "invitation.created", auditable: pending_invitation,
+    metadata: { invited_email: elena.email, role: "member" } },
+  { team: marketing, user: diego, action: "invitation.declined", auditable: declined_invitation }
+].each do |attrs|
+  AuditLogger.record(**attrs) unless AuditLog.exists?(team: attrs[:team], action: attrs[:action], auditable: attrs[:auditable])
 end
 
 puts "Done. Sample login: ana@teamflow.dev / password123"
