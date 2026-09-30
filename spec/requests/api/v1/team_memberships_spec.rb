@@ -42,6 +42,25 @@ RSpec.describe "Api::V1::TeamMemberships", type: :request do
     end
   end
 
+  describe "GET /api/v1/teams/:team_id/memberships" do
+    it "filters by role" do
+      create(:team_membership, team: team, user: member, role: :member)
+      admin = create(:user)
+      create(:team_membership, team: team, user: admin, role: :admin)
+
+      get "/api/v1/teams/#{team.id}/memberships", params: { role: "admin" }, headers: auth_headers(owner)
+
+      expect(json.map { |m| m["role"] }).to eq([ "admin" ])
+    end
+
+    it "returns a consistent error for an invalid role filter" do
+      get "/api/v1/teams/#{team.id}/memberships", params: { role: "not_a_role" }, headers: auth_headers(owner)
+
+      expect(response).to have_http_status(:bad_request)
+      expect(json["error"]["code"]).to eq("invalid_filter")
+    end
+  end
+
   describe "DELETE /api/v1/teams/:team_id/memberships/:id" do
     it "prevents removing the team owner" do
       owner_membership = TeamMembership.find_by(team: team, user: owner)

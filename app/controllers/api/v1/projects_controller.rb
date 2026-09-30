@@ -6,7 +6,7 @@ module Api
 
       def index
         authorize @team.projects.new, :index?, policy_class: ProjectPolicy
-        pagy, projects = pagy(@team.projects.order(:created_at))
+        pagy, projects = pagy(searched_projects.order(:created_at))
         render json: { projects: ProjectBlueprint.render_as_hash(projects), meta: pagination_meta(pagy) }
       end
 
@@ -47,6 +47,12 @@ module Api
 
       def project_params
         params.require(:project).permit(:name, :description)
+      end
+
+      def searched_projects
+        scope = @team.projects
+        scope = scope.where("name ILIKE ?", "%#{params[:q]}%") if params[:q].present?
+        scope
       end
     end
   end

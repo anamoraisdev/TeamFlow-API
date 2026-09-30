@@ -43,6 +43,33 @@ RSpec.describe "Api::V1::Tasks", type: :request do
 
       expect(response).to have_http_status(:forbidden)
     end
+
+    it "searches by title" do
+      matching = create(:task, project: project, title: "Implement authentication")
+      create(:task, project: project, title: "Write docs")
+
+      get "/api/v1/projects/#{project.id}/tasks", params: { q: "authent" }, headers: auth_headers(member)
+
+      expect(json["tasks"].map { |t| t["id"] }).to eq([ matching.id ])
+    end
+
+    it "sorts by the requested column and direction" do
+      low = create(:task, project: project, priority: :low)
+      high = create(:task, project: project, priority: :high)
+
+      get "/api/v1/projects/#{project.id}/tasks",
+          params: { sort: "priority", direction: "desc" },
+          headers: auth_headers(member)
+
+      expect(json["tasks"].map { |t| t["id"] }).to eq([ high.id, low.id ])
+    end
+
+    it "returns a consistent error for an invalid sort column" do
+      get "/api/v1/projects/#{project.id}/tasks", params: { sort: "not_a_column" }, headers: auth_headers(member)
+
+      expect(response).to have_http_status(:bad_request)
+      expect(json["error"]["code"]).to eq("invalid_filter")
+    end
   end
 
   describe "POST /api/v1/projects/:project_id/tasks" do

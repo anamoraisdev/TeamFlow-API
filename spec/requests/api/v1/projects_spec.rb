@@ -25,6 +25,17 @@ RSpec.describe "Api::V1::Projects", type: :request do
     end
   end
 
+  describe "GET /api/v1/teams/:team_id/projects" do
+    it "searches by name" do
+      matching = create(:project, team: team, name: "API Revamp")
+      create(:project, team: team, name: "Landing Page")
+
+      get "/api/v1/teams/#{team.id}/projects", params: { q: "revamp" }, headers: auth_headers(member)
+
+      expect(json["projects"].map { |p| p["id"] }).to eq([ matching.id ])
+    end
+  end
+
   describe "GET /api/v1/projects/:id" do
     it "allows any team member to view a project" do
       project = create(:project, team: team)

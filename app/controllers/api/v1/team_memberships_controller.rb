@@ -6,7 +6,9 @@ module Api
 
       def index
         authorize @team.team_memberships.new, :index?, policy_class: MembershipPolicy
-        memberships = @team.team_memberships.includes(:user).order(:created_at)
+        return unless valid_role_filter?
+
+        memberships = filtered_memberships.includes(:user).order(:created_at)
         render json: TeamMembershipBlueprint.render_as_hash(memberships)
       end
 
@@ -58,6 +60,24 @@ module Api
 
       def membership_params
         params.require(:membership).permit(:user_id, :role)
+      end
+
+      def filtered_memberships
+        scope = @team.team_memberships
+        scope = scope.where(role: params[:role]) if params[:role].present?
+        scope
+      end
+
+      def valid_role_filter?
+        return true if params[:role].blank? || TeamMembership.roles.key?(params[:role].to_s)
+
+        render_error(
+          status: :bad_request,
+          code: "invalid_filter",
+          message: "Invalid role filter",
+          details: { role: [ "must be one of: #{TeamMembership.roles.keys.join(', ')}" ] }
+        )
+        false
       end
 
       # Ownership is assigned exactly once, automatically, when a team is created

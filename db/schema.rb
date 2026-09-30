@@ -10,9 +10,10 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[8.1].define(version: 2026_09_29_100300) do
+ActiveRecord::Schema[8.1].define(version: 2026_09_29_100400) do
   # These are extensions that must be enabled in order to support this database
   enable_extension "pg_catalog.plpgsql"
+  enable_extension "pg_trgm"
 
   create_table "audit_logs", force: :cascade do |t|
     t.bigint "team_id", null: false
@@ -66,6 +67,7 @@ ActiveRecord::Schema[8.1].define(version: 2026_09_29_100300) do
     t.text "description"
     t.datetime "created_at", null: false
     t.datetime "updated_at", null: false
+    t.index ["name"], name: "index_projects_on_name_trgm", opclass: :gin_trgm_ops, using: :gin
     t.index ["team_id"], name: "index_projects_on_team_id"
   end
 
@@ -233,6 +235,7 @@ ActiveRecord::Schema[8.1].define(version: 2026_09_29_100300) do
     t.index ["priority"], name: "index_tasks_on_priority"
     t.index ["project_id"], name: "index_tasks_on_project_id"
     t.index ["status"], name: "index_tasks_on_status"
+    t.index ["title"], name: "index_tasks_on_title_trgm", opclass: :gin_trgm_ops, using: :gin
   end
 
   create_table "team_memberships", force: :cascade do |t|
