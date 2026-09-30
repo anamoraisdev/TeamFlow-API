@@ -35,6 +35,9 @@ gem "blueprinter"
 # release is a from-scratch rewrite with a different, less documented API)
 gem "pagy", "~> 9.4"
 
+# Postgres-backed background jobs (no Redis needed) for async notifications
+gem "solid_queue"
+
 group :development, :test do
   # See https://guides.rubyonrails.org/debugging_rails_applications.html#debugging-with-the-debug-gem
   gem "debug", platforms: %i[ mri windows ], require: "debug/prelude"
