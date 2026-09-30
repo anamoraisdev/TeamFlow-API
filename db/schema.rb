@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[8.1].define(version: 2026_09_29_100100) do
+ActiveRecord::Schema[8.1].define(version: 2026_09_29_100200) do
   # These are extensions that must be enabled in order to support this database
   enable_extension "pg_catalog.plpgsql"
 
@@ -27,6 +27,18 @@ ActiveRecord::Schema[8.1].define(version: 2026_09_29_100100) do
     t.index ["created_at"], name: "index_audit_logs_on_created_at"
     t.index ["team_id"], name: "index_audit_logs_on_team_id"
     t.index ["user_id"], name: "index_audit_logs_on_user_id"
+  end
+
+  create_table "notifications", force: :cascade do |t|
+    t.bigint "user_id", null: false
+    t.string "category", null: false
+    t.string "title", null: false
+    t.text "body"
+    t.jsonb "payload", default: {}, null: false
+    t.datetime "read_at"
+    t.datetime "created_at", null: false
+    t.index ["user_id", "read_at"], name: "index_notifications_on_user_id_and_read_at"
+    t.index ["user_id"], name: "index_notifications_on_user_id"
   end
 
   create_table "projects", force: :cascade do |t|
@@ -232,6 +244,7 @@ ActiveRecord::Schema[8.1].define(version: 2026_09_29_100100) do
 
   add_foreign_key "audit_logs", "teams"
   add_foreign_key "audit_logs", "users"
+  add_foreign_key "notifications", "users"
   add_foreign_key "projects", "teams"
   add_foreign_key "solid_queue_batch_executions", "solid_queue_batches", column: "batch_id", on_delete: :cascade
   add_foreign_key "solid_queue_batch_executions", "solid_queue_jobs", column: "job_id", on_delete: :cascade

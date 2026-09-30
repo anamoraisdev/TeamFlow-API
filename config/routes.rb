@@ -19,6 +19,10 @@ Rails.application.routes.draw do
       end
 
       resources :tasks, only: %i[show update destroy]
+
+      resources :notifications, only: %i[index]
+      post "notifications/read_all", to: "notifications#read_all"
+      patch "notifications/:id/read", to: "notifications#read"
     end
   end
 end
