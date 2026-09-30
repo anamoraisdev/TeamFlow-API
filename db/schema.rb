@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[8.1].define(version: 2026_09_29_100400) do
+ActiveRecord::Schema[8.1].define(version: 2026_09_29_100500) do
   # These are extensions that must be enabled in order to support this database
   enable_extension "pg_catalog.plpgsql"
   enable_extension "pg_trgm"
@@ -246,6 +246,7 @@ ActiveRecord::Schema[8.1].define(version: 2026_09_29_100400) do
     t.datetime "updated_at", null: false
     t.index ["team_id", "user_id"], name: "index_team_memberships_on_team_id_and_user_id", unique: true
     t.index ["team_id"], name: "index_team_memberships_on_team_id"
+    t.index ["team_id"], name: "index_team_memberships_on_team_id_when_owner", unique: true, where: "(role = 2)"
     t.index ["user_id"], name: "index_team_memberships_on_user_id"
   end
 
