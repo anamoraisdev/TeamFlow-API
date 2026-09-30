@@ -8,29 +8,21 @@ class TaskPolicy < ApplicationPolicy
   end
 
   def create?
-    member?
+    allowed?(:task_manage)
   end
 
   def update?
-    member?
+    allowed?(:task_manage)
   end
 
   def destroy?
-    member?
+    allowed?(:task_manage)
   end
 
   private
 
   def team
     record.project.team
-  end
-
-  def role
-    user.role_in(team)
-  end
-
-  def member?
-    role.present?
   end
 
   class Scope < ApplicationPolicy::Scope

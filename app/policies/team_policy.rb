@@ -12,29 +12,17 @@ class TeamPolicy < ApplicationPolicy
   end
 
   def update?
-    admin_or_owner?
+    allowed?(:team_update)
   end
 
   def destroy?
-    owner?
+    allowed?(:team_destroy)
   end
 
   private
 
-  def role
-    user.role_in(record)
-  end
-
-  def member?
-    role.present?
-  end
-
-  def admin_or_owner?
-    role.in?(%w[admin owner])
-  end
-
-  def owner?
-    role == "owner"
+  def team
+    record
   end
 
   class Scope < ApplicationPolicy::Scope

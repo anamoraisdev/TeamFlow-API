@@ -8,33 +8,21 @@ class ProjectPolicy < ApplicationPolicy
   end
 
   def create?
-    admin_or_owner?
+    allowed?(:project_manage)
   end
 
   def update?
-    admin_or_owner?
+    allowed?(:project_manage)
   end
 
   def destroy?
-    admin_or_owner?
+    allowed?(:project_manage)
   end
 
   private
 
   def team
     record.team
-  end
-
-  def role
-    user.role_in(team)
-  end
-
-  def member?
-    role.present?
-  end
-
-  def admin_or_owner?
-    role.in?(%w[admin owner])
   end
 
   class Scope < ApplicationPolicy::Scope

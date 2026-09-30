@@ -4,33 +4,21 @@ class MembershipPolicy < ApplicationPolicy
   end
 
   def create?
-    admin_or_owner?
+    allowed?(:membership_manage)
   end
 
   def update?
-    admin_or_owner?
+    allowed?(:membership_manage)
   end
 
   def destroy?
-    admin_or_owner? && record.role != "owner"
+    allowed?(:membership_manage) && record.role != "owner"
   end
 
   private
 
   def team
     record.team
-  end
-
-  def role
-    user.role_in(team)
-  end
-
-  def member?
-    role.present?
-  end
-
-  def admin_or_owner?
-    role.in?(%w[admin owner])
   end
 
   class Scope < ApplicationPolicy::Scope

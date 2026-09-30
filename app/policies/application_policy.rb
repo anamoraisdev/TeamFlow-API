@@ -36,6 +36,27 @@ class ApplicationPolicy
     false
   end
 
+  # Overridden by subclasses to resolve the team a role should be checked
+  # against for the record/action being authorized. Returns nil when the
+  # action isn't scoped to an existing team (e.g. Team#create).
+  def team
+    nil
+  end
+
+  def role_in_team
+    return @role_in_team if defined?(@role_in_team)
+
+    @role_in_team = team && user.role_in(team)
+  end
+
+  def member?
+    role_in_team.present?
+  end
+
+  def allowed?(ability)
+    Permissions.allowed?(role_in_team, ability)
+  end
+
   class Scope
     def initialize(user, scope)
       @user = user
